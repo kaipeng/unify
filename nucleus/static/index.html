@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>TCT PnL Sheet</title>
+
+
+
+    <!-- Note that you need antiscroll CSS to support ember-table
+      <link rel="stylesheet" href="css/normalize.css">
+    -->
+    <link rel="stylesheet" href="css/style.css">
+    <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css" rel = "stylesheet">
+
+    <link rel="stylesheet" href="http://rawgit.com/LearnBoost/antiscroll/master/antiscroll.css">
+    <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/normalize/2.1.0/normalize.css">
+    <link rel="stylesheet" href="http://rawgit.com/Addepar/ember-table/v0.2.1/dist/ember-table.css">
+    <!-- Ember and dependencies
+    <script src="js/libs/jquery-1.10.2.js"></script>
+    <script src="js/libs/handlebars-1.1.2.js"></script>
+    <script src="js/libs/ember-1.5.1.js"></script>
+    -->
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.3.0/handlebars.js"></script>
+    <script src="http://builds.emberjs.com/tags/v1.5.1/ember.js"></script>
+    <!-- Ember Table and dependencies -->
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.2/jquery-ui.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-mousewheel/3.1.6/jquery.mousewheel.js"></script>
+    <script src="http://rawgit.com/LearnBoost/antiscroll/master/antiscroll.js"></script>
+    <script src="http://rawgit.com/Addepar/ember-table/v0.2.1/dependencies/ember-addepar-mixins/resize_handler.js"></script>
+    <script src="http://rawgit.com/Addepar/ember-table/v0.2.1/dependencies/ember-addepar-mixins/style_bindings.js"></script>
+    <script src="http://rawgit.com/Addepar/ember-table/v0.2.1/dist/ember-table.js"></script>
+
+
+    <!-- App Dependencies -->
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/showdown/0.3.1/showdown.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.1.0/moment.min.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/router.js"></script>
+    <!-- to activate the test runner, add the "?test" query string parameter
+    <script src="tests/runner.js"></script>
+    -->
+</head>
+<body>
+  <script type="text/x-handlebars">
+    <div class="navbar">
+      <div class="navbar-inner">
+        {{#link-to 'index' class='brand'}}Tactical Corporate Trading{{/link-to}}
+        <ul class="nav">
+          <li>{{#link-to 'sortable'}}Sortable{{/link-to}}</li>
+          <li>{{#link-to 'financial'}}Financial{{/link-to}}</li>
+
+        </ul>
+      </div>
+    </div>
+
+    {{outlet}}
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="sortable-header-cell">
+    <div class="ember-table-content-container" {{action sortByColumn view.content}}>
+      <span class="ember-table-content">
+        {{view.content.headerCellName}}
+        {{#if view.content.supportSort}}
+        <div style="float:right;">
+        {{#if view.content.sorted}}
+          {{#if sortAscending}}
+          <div style="cursor:s-resize;" title="Ascending">
+            &#8593;
+          </div>
+          {{else}}
+          <div style="cursor:n-resize;" title="Descending">
+            &#8595;
+          </div>
+          {{/if}}
+        {{else}}
+          &#8645;
+        {{/if}}
+          </div>
+        {{/if}}
+      </span>
+    </div>
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="index">
+    <div>
+        Welcome to the Index
+    </div>
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="sortable">
+    <div class="table-container">
+      {{sortable-table-component
+        hasFooter=false
+        columnsBinding="columns"
+        contentBinding="content"
+        enableContentSelection=true
+        sortAction="sort"
+        sortAscendingBinding="sortAscending"
+      }}
+      <ul class="pagination">
+        <li class="disabled"><a {{action previousPage}}>&laquo;</a></li>
+        <li class="active">
+          <span>{{page}} <span class="sr-only">(current)</span></span>
+        </li>
+        <li class="disabled"><a {{action nextPage}}>&raquo;</a></li>
+      </ul>
+    </div>
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="financial">
+    <div class="table-container">
+      {{table-component
+          hasHeader=true
+          hasFooter=false
+          numFixedColumns=0
+          rowHeight=35
+          columnsBinding="columns"
+          contentBinding="content"
+      }}
+    </div>
+  </script>
+  <script type="text/x-handlebars" data-template-name="financial_table_cell">
+    <div class="ember-table-cell-container">
+      <span class="ember-table-content">
+        {{view.cellContent}}
+      </span>
+    </div>
+  </script>
+  <script type="text/x-handlebars" data-template-name="financial_table_tree_cell">
+    <div class="ember-table-cell-container" {{bind-attr style="view.paddingStyle"}}>
+      <span {{bind-attr class=":ember-table-toggle-span view.row.isLeaf::ember-table-toggle
+        view.row.isCollapsed:ember-table-expand:ember-table-collapse"}}
+        {{action toggleCollapse view.row}}>
+        <i class="icon-caret-down ember-table-toggle-icon"></i>
+      </span>
+      <span class="ember-table-content">
+        {{view.cellContent}}
+      </span>
+    </div>
+  </script>
+  <script type="text/x-handlebars" data-template-name="financial_table_header_cell">
+    <div class="ember-table-cell-container">
+      <div class="ember-table-header-content-container">
+        <span class="ember-table-content">
+          {{view.content.headerCellName}}
+        </span>
+      </div>
+    </div>
+  </script>
+  <script type="text/x-handlebars" data-template-name="financial_table_header_cell">
+    <div class="ember-table-cell-container">
+      <span {{bind-attr class=":ember-table-toggle-span :ember-table-toggle
+          isCollapsed:ember-table-expand:ember-table-collapse"}}
+          {{action toggleTableCollapse}}>
+        <i class="icon-caret-down ember-table-toggle-icon"></i>
+      </span>
+      <div class="ember-table-header-content-container">
+        <span class="ember-table-content">
+          {{view.column.headerCellName}}
+        </span>
+      </div>
+    </div>
+  </script>
+
+
+
+
+</body>
+</html>
