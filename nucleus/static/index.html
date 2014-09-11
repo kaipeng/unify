@@ -49,7 +49,7 @@
         <ul class="nav">
           <li>{{#link-to 'sortable'}}Sortable{{/link-to}}</li>
           <li>{{#link-to 'financial'}}Financial{{/link-to}}</li>
-
+          <li>{{#link-to 'hello'}}Hello{{/link-to}}</li>
         </ul>
       </div>
     </div>
@@ -108,63 +108,81 @@
     </div>
   </script>
 
-  <script type="text/x-handlebars" data-template-name="financial">
-    <div class="table-container">
-      {{table-component
+    <script type="text/x-handlebars" data-template-name="financial">
+      <div class="table-container">
+        {{table-component
+            hasHeader=true
+            hasFooter=false
+            numFixedColumns=0
+            rowHeight=35
+            columnsBinding="columns"
+            contentBinding="content"
+        }}
+      </div>
+    </script>
+
+  <script type="text/x-handlebars" data-template-name="hello">
+      <div class="table-container">
+        {{table-component
           hasHeader=true
           hasFooter=false
-          numFixedColumns=0
-          rowHeight=35
+          enableContentSelection=true
           columnsBinding="columns"
           contentBinding="content"
-      }}
-    </div>
-  </script>
-  <script type="text/x-handlebars" data-template-name="financial_table_cell">
-    <div class="ember-table-cell-container">
-      <span class="ember-table-content">
-        {{view.cellContent}}
-      </span>
-    </div>
-  </script>
-  <script type="text/x-handlebars" data-template-name="financial_table_tree_cell">
-    <div class="ember-table-cell-container" {{bind-attr style="view.paddingStyle"}}>
-      <span {{bind-attr class=":ember-table-toggle-span view.row.isLeaf::ember-table-toggle
-        view.row.isCollapsed:ember-table-expand:ember-table-collapse"}}
-        {{action toggleCollapse view.row}}>
-        <i class="icon-caret-down ember-table-toggle-icon"></i>
-      </span>
-      <span class="ember-table-content">
-        {{view.cellContent}}
-      </span>
-    </div>
-  </script>
-  <script type="text/x-handlebars" data-template-name="financial_table_header_cell">
-    <div class="ember-table-cell-container">
-      <div class="ember-table-header-content-container">
+          rowHeight=30
+        }}
+      </div>
+    </script>
+
+
+
+
+  <!--
+    <script type="text/x-handlebars" data-template-name="financial_table_cell">
+      <div class="ember-table-cell-container">
         <span class="ember-table-content">
-          {{view.content.headerCellName}}
+          {{view.cellContent}}
         </span>
       </div>
-    </div>
-  </script>
-  <script type="text/x-handlebars" data-template-name="financial_table_header_cell">
-    <div class="ember-table-cell-container">
-      <span {{bind-attr class=":ember-table-toggle-span :ember-table-toggle
-          isCollapsed:ember-table-expand:ember-table-collapse"}}
-          {{action toggleTableCollapse}}>
-        <i class="icon-caret-down ember-table-toggle-icon"></i>
-      </span>
-      <div class="ember-table-header-content-container">
+    </script>
+    <script type="text/x-handlebars" data-template-name="financial_table_tree_cell">
+      <div class="ember-table-cell-container" {{bind-attr style="view.paddingStyle"}}>
+        <span {{bind-attr class=":ember-table-toggle-span view.row.isLeaf::ember-table-toggle
+          view.row.isCollapsed:ember-table-expand:ember-table-collapse"}}
+          {{action toggleCollapse view.row}}>
+          <i class="icon-caret-down ember-table-toggle-icon"></i>
+        </span>
         <span class="ember-table-content">
-          {{view.column.headerCellName}}
+          {{view.cellContent}}
         </span>
       </div>
-    </div>
-  </script>
+    </script>
+    <script type="text/x-handlebars" data-template-name="financial_table_header_cell">
+      <div class="ember-table-cell-container">
+        <div class="ember-table-header-content-container">
+          <span class="ember-table-content">
+            {{view.content.headerCellName}}
+          </span>
+        </div>
+      </div>
+    </script>
+    <script type="text/x-handlebars" data-template-name="financial_table_header_cell">
+      <div class="ember-table-cell-container">
+        <span {{bind-attr class=":ember-table-toggle-span :ember-table-toggle
+            isCollapsed:ember-table-expand:ember-table-collapse"}}
+            {{action toggleTableCollapse}}>
+          <i class="icon-caret-down ember-table-toggle-icon"></i>
+        </span>
+        <div class="ember-table-header-content-container">
+          <span class="ember-table-content">
+            {{view.column.headerCellName}}
+          </span>
+        </div>
+      </div>
+    </script>
+
+  -->
 
 
-
-
-</body>
-</html>
+  </body>
+  </html>
