@@ -70,7 +70,8 @@ def topicName(security):
 
 
 from django.shortcuts import get_object_or_404, render, redirect
-from django_socketio import broadcast_channel, broadcast, NoSocket
+#from django_socketio import broadcast_channel, broadcast, NoSocket
+from omnibus.api import publish
 from time import strftime, gmtime
 import datetime
 
@@ -84,14 +85,22 @@ def printMessage(msg, eventType):
         msg.getElement("MKTDATA_EVENT_TYPE") if msg.hasElement("MKTDATA_EVENT_TYPE") else "",
         msg.getElement("MKTDATA_EVENT_SUBTYPE") if msg.hasElement("MKTDATA_EVENT_SUBTYPE") else "",
         msg)
-    print strftime("%H:%M:%S",gmtime()), msg.getElement("EVENT_TIME") if msg.hasElement("EVENT_TIME") else ""
+    #print strftime("%H:%M:%S",gmtime()), msg.getElement("EVENT_TIME") if msg.hasElement("EVENT_TIME") else ""
 
     data = {"action": "message", "message": str(msg)}
 
     try:
-        broadcast_channel(data, channel="main")
-    except NoSocket, e:
-        print "NO SOCKET: ", e
+        publish(
+            'main',  # the name of the channel
+            'message',  # the `type` of the message/event, clients use this name
+            # to register event handlers
+            {'data': data},  # payload of the event, needs to be
+            # a dict which is JSON dumpable.
+            sender='server'  # sender id of the event, can be None.
+        )
+        #broadcast_channel(data, channel="main")
+    except:
+        print "SOCKET ERROR: ", sys.exc_info()[0]
 
 
 def parseCmdLine():

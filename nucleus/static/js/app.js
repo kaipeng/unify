@@ -375,6 +375,13 @@ App.HelloController = Ember.Controller.extend({
         socket.on('disconnect', disconnected);
         socket.on('message', messaged);
     };
+    var startWS = function() {
+        socket = new WebSocket('wss://localhost/dashboard');
+        socket.onopen = function(evt) { console.log(evt.data); };
+        socket.onclose = function(evt) { console.log(evt); };
+        socket.onmessage = function(evt) { messaged(evt.data) };
+        socket.onerror = function(evt) { console.log(evt); };
+    };
 
     start();
     },

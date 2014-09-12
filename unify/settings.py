@@ -29,7 +29,8 @@ ALLOWED_HOSTS = []
 # SOCKETIO SETTINGS
 SOCKETIO_HOST = "0.0.0.0"
 SOCKETIO_PORT = "80"
-
+OMNIBUS_SERVER_PORT = "80"
+OMNIBUS_SERVER_HOST = "0.0.0.0"
 # Application definition
 
 INSTALLED_APPS = (
@@ -39,10 +40,16 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_socketio',
-    'chat',
+    #'django_socketio',
+    'omnibus',
+    #'chat',
     'nucleus',
 )
+TEMPLATE_CONTEXT_PROCESSORS = (
+    # other context processors
+    'omnibus.context_processors.omnibus',
+)
+
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',

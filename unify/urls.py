@@ -7,8 +7,7 @@ urlpatterns = [
     # url(r'^blog/', include('blog.urls')),
     # url("", include('django_socketio.urls')),
     url(r'^admin/', include(admin.site.urls)),
-    url("", include("django_socketio.urls")),
-    url("", include("chat.urls")),
+    #url("", include("chat.urls")),
     url("", include("nucleus.urls")),
 
 ]
