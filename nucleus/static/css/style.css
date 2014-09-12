@@ -6,3 +6,13 @@
 .table-container {
   height: 1000px;
 }
+
+.bar-cell {
+height: 29px!important;
+display: inline-block;
+vertical-align: middle;
+}
+
+.blue {
+background-color: #fd7400;
+}

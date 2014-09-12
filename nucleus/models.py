@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 
-
+'''
 
 #Securities
 class Security(models.Model):
@@ -112,3 +112,4 @@ class Comment(models.Model): #attached to trades
     body = models.CharField(max_length=1000)
     user = models.ForeignKey('User')
 
+'''

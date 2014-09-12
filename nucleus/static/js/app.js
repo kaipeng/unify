@@ -241,70 +241,168 @@ App.SortableController = Ember.Controller.extend({
 
 // HELLO TABLE
 App.HelloController = Ember.Controller.extend({
-  numRows: 1,
-  columns: Ember.computed(function() {
-    var closeColumn, dateColumn, highColumn, lowColumn, openColumn;
-    dateColumn = Ember.Table.ColumnDefinition.create({
-      columnWidth: 150,
+  numRows: 100,
+  content: Em.A(),
+  columns: function () {
+    var tickerColumn, timeColumn, bidsizeColumn, bidColumn, askColumn, asksizeColumn, lastColumn, tradesizeColumn;
+    timeColumn = Ember.Table.ColumnDefinition.create({
+      columnWidth: 400,
       textAlign: 'text-align-left',
-      headerCellName: 'Date',
-      getCellContent: function(row) {
-        return row['date'].toDateString();
-      }
+      headerCellName: 'Time',
+      contentPath: 'time'
     });
-    openColumn = Ember.Table.ColumnDefinition.create({
+    tickerColumn = Ember.Table.ColumnDefinition.create({
       columnWidth: 100,
-      headerCellName: 'Open',
-      getCellContent: function(row) {
-        return row['open'].toFixed(2);
-      }
+      headerCellName: 'Ticker',
+      contentPath: 'ticker'
     });
-    highColumn = Ember.Table.ColumnDefinition.create({
+    bidColumn = Ember.Table.ColumnDefinition.create({
       columnWidth: 100,
-      headerCellName: 'High',
-      getCellContent: function(row) {
-        return row['high'].toFixed(2);
-      }
+      headerCellName: 'Bid',
+      contentPath: 'bid'
     });
-    lowColumn = Ember.Table.ColumnDefinition.create({
+    askColumn = Ember.Table.ColumnDefinition.create({
       columnWidth: 100,
-      headerCellName: 'Low',
-      getCellContent: function(row) {
-        return row['low'].toFixed(2);
-      }
+      headerCellName: 'Ask',
+      contentPath: 'ask'
     });
-    closeColumn = Ember.Table.ColumnDefinition.create({
+    bidsizeColumn = Ember.Table.ColumnDefinition.create({
       columnWidth: 100,
-      headerCellName: 'Close',
-      getCellContent: function(row) {
-        return row['close'].toFixed(2);
-      }
+      headerCellName: 'Bid Size',
+      contentPath: 'bidsize'
     });
-    return [dateColumn, openColumn, highColumn, lowColumn, closeColumn];
-  }),
+    asksizeColumn = Ember.Table.ColumnDefinition.create({
+      columnWidth: 100,
+      headerCellName: 'Ask Size',
+      contentPath: 'asksize'
+    });
+    lastColumn = Ember.Table.ColumnDefinition.create({
+      columnWidth: 100,
+      headerCellName: 'Last',
+      contentPath: 'last'
+    });
+    tradesizeColumn = Ember.Table.ColumnDefinition.create({
+      //color: 'blue',
+      columnWidth: 100,
+      headerCellName: 'Trade Size',
+      tableCellViewClass: 'App.BarTableCellView',
+      contentPath: 'tradesize'
+    });
+    return [tickerColumn, timeColumn, bidsizeColumn, bidColumn, askColumn, asksizeColumn, lastColumn, tradesizeColumn];
+  }.property(),
 
+  updateData: function () {
+        console.log('generating random data');
+        var content;
+        content = this.get('content');
+        content.clear();
+        for (var i = 0; i < this.get('numRows'); i++){
+              var row = Ember.Object.create();
+              row.set('time', new Date());
+              row.set('ticker', Math.random() * 100 - 50);
+              row.set('bid', Math.random() * 100 - 50);
+              row.set('ask', Math.random() * 100 - 50);
+              row.set('bidsize', Math.random() * 80+10);
+              row.set('asksize', Math.random() * 80+10);
+              row.set('last', Math.random() * 100 - 50);
+              row.set('tradesize', Math.random() * 80 + 10);
+              content.pushObject(row);
+        }
+  }.on('init').observes('numRows'),
 
-  content: Ember.computed(function() {
-    var _i, _ref, _results;
-    return (function() {
-      _results = [];
-      for (var _i = 0, _ref = this.get('numRows'); 0 <= _ref ? _i < _ref : _i > _ref; 0 <= _ref ? _i++ : _i--){ _results.push(_i); }
-      return _results;
-    }).apply(this).map(function(index) {
-      var date;
-      date = new Date();
-      date.setDate(date.getDate() + index);
-      return {
-        date: date,
-        open: Math.random() * 100 - 50,
-        high: Math.random() * 100 - 50,
-        low: Math.random() * 100 - 50,
-        close: Math.random() * 100 - 50,
-        volume: Math.random() * 1000000
-      };
-    });
-  }).property('numRows')
+  init: function() {
+    // SOCKET
+    var socket;
+
+    var content = this.get('content');
+
+    var connected = function() {
+        socket.subscribe('main');
+    };
+
+    var disconnected = function() {
+        setTimeout(start, 1000);
+    };
+
+    var numRows = this.numRows;
+
+    var messaged = function(data) {
+        switch (data.action) {
+            case 'message':
+                var m = data['message'];
+
+                m = m.substring(m.search("{"));
+                m = m.replace(/\"/g,"");
+                m = m.replace('{\n',"{");
+                m = m.replace('\n}\n',"\"}");
+
+                m = m.replace(/ = /g,"\" : \"");
+                m = m.replace(/    /g,"\"");
+                m = m.replace(/\n/g,"\",\n");
+                //console.log(m);
+                var j = JSON.parse(m);
+                //alert(j.result);
+                var i;
+
+                for(i = 0; i < numRows; i++){
+                    content.get(i).set('ticker',"ESU4");
+                    if(j.MKTDATA_EVENT_TYPE == "QUOTE"){
+                        if(j.MKTDATA_EVENT_SUBTYPE == "BID"){
+                            content.get(i).set('time',j.BID_UPDATE_STAMP_RT);
+                            content.get(i).set('bid',j.BID);
+                            content.get(i).set('bidsize',j.BID_SIZE);
+                        }
+                        if(j.MKTDATA_EVENT_SUBTYPE == "ASK"){
+                            content.get(i).set('time',j.ASK_UPDATE_STAMP_RT);
+                            content.get(i).set('ask',j.ASK);
+                            content.get(i).set('asksize',j.ASK_SIZE);
+                        }
+                    }
+                    if(j.MKTDATA_EVENT_TYPE == "TRADE"){
+                        content.get(i).set('time',j.TRADE_UPDATE_STAMP_RT);
+                        content.get(i).set('last',j.LAST_TRADE);
+                        content.get(i).set('tradesize',j.SIZE_LAST_TRADE);
+                    }
+                }
+                break;
+        }
+    };
+
+    var start = function() {
+        socket = new io.Socket();
+        socket.connect();
+        socket.on('connect', connected);
+        socket.on('disconnect', disconnected);
+        socket.on('message', messaged);
+    };
+
+    start();
+    },
 });
+
+App.BarTableCellView = Ember.Table.TableCell.extend({
+  templateName: 'bar_table_cell',
+  //classNameBindings: ['column.color'],
+    //  barColor: function() {
+    //    return "blue";
+    //  }.property('barWidth'),
+    barColor : ' blue ',
+
+  barWidth: function() {
+    var column, row, _ref;
+    _ref = this.getProperties('column', 'row'), column = _ref.column, row = _ref.row;
+    if (!(column && row)) {
+      return 0;
+    }
+    return Math.round(+this.get('cellContent'));
+  }.property('column', 'row', 'cellContent'),
+
+  histogramStyle: function() {
+    return "width: " + (this.get('barWidth')) + "%;";
+  }.property('barWidth')
+});
+
+
 
 
 
@@ -584,3 +682,32 @@ App.FinancialTableTreeTableRow = Ember.Table.Row.extend({
 });
 
 */
+
+
+function updateClock ( )
+{
+  var currentTime = new Date ( );
+
+  var currentHours = currentTime.getHours ( );
+  var currentMinutes = currentTime.getMinutes ( );
+  var currentSeconds = currentTime.getSeconds ( );
+
+  // Pad the minutes and seconds with leading zeros, if required
+  currentMinutes = ( currentMinutes < 10 ? "0" : "" ) + currentMinutes;
+  currentSeconds = ( currentSeconds < 10 ? "0" : "" ) + currentSeconds;
+
+  // Choose either "AM" or "PM" as appropriate
+  var timeOfDay = ( currentHours < 12 ) ? "AM" : "PM";
+
+  // Convert the hours component to 12-hour format if needed
+  currentHours = ( currentHours > 12 ) ? currentHours - 12 : currentHours;
+
+  // Convert an hours component of "0" to "12"
+  currentHours = ( currentHours == 0 ) ? 12 : currentHours;
+
+  // Compose the string for display
+  var currentTimeString = currentHours + ":" + currentMinutes + ":" + currentSeconds + " " + timeOfDay;
+
+  // Update the time display
+  document.getElementById("clock").firstChild.nodeValue = currentTimeString;
+}

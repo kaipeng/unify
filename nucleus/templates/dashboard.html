@@ -9,7 +9,7 @@
     <!-- Note that you need antiscroll CSS to support ember-table
       <link rel="stylesheet" href="css/normalize.css">
     -->
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css">
     <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css" rel = "stylesheet">
 
     <link rel="stylesheet" href="http://rawgit.com/LearnBoost/antiscroll/master/antiscroll.css">
@@ -35,16 +35,18 @@
     <!-- App Dependencies -->
     <script src="http://cdnjs.cloudflare.com/ajax/libs/showdown/0.3.1/showdown.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/moment.js/2.1.0/moment.min.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/router.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/router.js"></script>
     <!-- to activate the test runner, add the "?test" query string parameter
     <script src="tests/runner.js"></script>
     -->
 
-
+    {% load socketio_tags %}
+    {% socketio %}
 </head>
-<body>
+<body onload="updateClock(); setInterval('updateClock()', 1000 )">
 
+{% verbatim %}
   <script type="text/x-handlebars">
     <div class="navbar">
       <div class="navbar-inner">
@@ -53,6 +55,8 @@
           <li>{{#link-to 'sortable'}}Sortable{{/link-to}}</li>
           <li>{{#link-to 'financial'}}Financial{{/link-to}}</li>
           <li>{{#link-to 'hello'}}Hello{{/link-to}}</li>
+
+          <li><span id="clock">&nbsp;</span></li>
         </ul>
       </div>
     </div>
@@ -140,6 +144,9 @@
 
 
 
+
+
+
   <!--
     <script type="text/x-handlebars" data-template-name="financial_table_cell">
       <div class="ember-table-cell-container">
@@ -186,6 +193,6 @@
 
   -->
 
-
+{% endverbatim %}
   </body>
   </html>

@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django_socketio',
     'chat',
+    'nucleus',
 )
 
 MIDDLEWARE_CLASSES = (

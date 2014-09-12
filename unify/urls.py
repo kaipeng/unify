@@ -9,5 +9,6 @@ urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url("", include("django_socketio.urls")),
     url("", include("chat.urls")),
+    url("", include("nucleus.urls")),
 
 ]

@@ -85,13 +85,13 @@ def printMessage(msg, eventType):
         msg.getElement("MKTDATA_EVENT_SUBTYPE") if msg.hasElement("MKTDATA_EVENT_SUBTYPE") else "",
         msg)
     print strftime("%H:%M:%S",gmtime()), msg.getElement("EVENT_TIME") if msg.hasElement("EVENT_TIME") else ""
-    room = "1"
-    data = {"room" : room,"action": "message", "message": text}
+
+    data = {"action": "message", "message": str(msg)}
 
     try:
-        broadcast_channel(data, channel="room-"+room)
+        broadcast_channel(data, channel="main")
     except NoSocket, e:
-        print "NO SOCKET: " + room, e
+        print "NO SOCKET: ", e
 
 
 def parseCmdLine():
@@ -140,10 +140,10 @@ def parseCmdLine():
     (options, args) = parser.parse_args()
 
     if not options.securities:
-        options.securities = ["ESA Index", "TYA Comdty"]
+        options.securities = ["ESA Index"]
 
     if not options.fields:
-        options.fields = ["LAST_PRICE"]
+        options.fields = ["LAST_PRICE", "BID", "ASK"]
 
     options.auth = getAuthentificationOptions(options.authType,
                                               options.authName)
