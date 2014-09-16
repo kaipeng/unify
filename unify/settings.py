@@ -8,6 +8,17 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/dev/ref/settings/
 """
 
+'''
+DEPENDENCIES
+django-redis-websockets
+redis for python?
+django-redis-sessions
+
+gevent
+
+
+'''
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
@@ -27,10 +38,15 @@ TEMPLATE_DEBUG = True
 ALLOWED_HOSTS = []
 
 # SOCKETIO SETTINGS
+'''
 SOCKETIO_HOST = "0.0.0.0"
 SOCKETIO_PORT = "80"
 OMNIBUS_SERVER_PORT = "80"
 OMNIBUS_SERVER_HOST = "0.0.0.0"
+'''
+
+
+
 # Application definition
 
 INSTALLED_APPS = (
@@ -41,29 +57,32 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     #'django_socketio',
-    'omnibus',
+    #'omnibus',
     #'chat',
     'nucleus',
+    'ws4redis',
 )
 TEMPLATE_CONTEXT_PROCESSORS = (
     # other context processors
-    'omnibus.context_processors.omnibus',
+    #'omnibus.context_processors.omnibus',
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.static',
+    'ws4redis.context_processors.default',
 )
 
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    #'django.middleware.common.CommonMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
 ROOT_URLCONF = 'unify.urls'
 
-WSGI_APPLICATION = 'unify.wsgi.application'
 
 
 # Database
@@ -94,3 +113,42 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+
+# This setting is required to override the Django's main loop, when running in
+# development mode, such as ./manage runserver
+WSGI_APPLICATION = 'ws4redis.django_runserver.application'
+#WSGI_APPLICATION = 'unify.wsgi.application'
+
+# URL that distinguishes websocket connections from normal requests
+WEBSOCKET_URL = '/ws/'
+
+# Set the number of seconds each message shall persited
+WS4REDIS_EXPIRE = 3600
+
+WS4REDIS_HEARTBEAT = '--heartbeat--'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '[%(asctime)s %(module)s] %(levelname)s: %(message)s'
+        },
+        },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+            },
+        },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': True,
+            },
+        },
+    }
