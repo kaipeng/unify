@@ -3,9 +3,8 @@ import os
 import sys
 
 if __name__ == "__main__":
-    print "Manage.py: Starting ze App!!"
-    import os
-    print(os.getpid())
+    print "Starting ze App!!"
+
 
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "unify.settings")
 
@@ -13,3 +12,4 @@ if __name__ == "__main__":
 
     execute_from_command_line(sys.argv)
 
+#$ python manage.py runserver_socketio host:port

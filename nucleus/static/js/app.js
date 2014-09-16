@@ -327,8 +327,7 @@ App.HelloController = Ember.Controller.extend({
     var numRows = this.numRows;
 
     var messaged = function(data) {
-        data = JSON.parse(data);
-        switch (data['action']) {
+        switch (data.action) {
             case 'message':
                 var m = data['message'];
 
@@ -377,26 +376,14 @@ App.HelloController = Ember.Controller.extend({
         socket.on('message', messaged);
     };
     var startWS = function() {
-        var ws4redis = WS4Redis({
-            uri: ws_uri.concat('blp?subscribe-broadcast'),
-            heartbeat_msg: ws_heartbeat_msg,
-            receive_message: receiveMessage,
-        });
-
-        // receive a message though the websocket from the server
-        function receiveMessage(msg) {
-            //console.log('Message from Websocket: ' + msg);
-            messaged(msg);
-        }
-
-//        socket = new WebSocket('ws://localhost/dashboard');
-//        socket.onopen = function(evt) { console.log(evt.data); };
-//        socket.onclose = function(evt) { console.log(evt); };
-//        socket.onmessage = function(evt) { messaged(evt.data) };
-//        socket.onerror = function(evt) { console.log(evt); };
+        socket = new WebSocket('wss://localhost/dashboard');
+        socket.onopen = function(evt) { console.log(evt.data); };
+        socket.onclose = function(evt) { console.log(evt); };
+        socket.onmessage = function(evt) { messaged(evt.data) };
+        socket.onerror = function(evt) { console.log(evt); };
     };
 
-    startWS();
+    start();
     },
 });
 

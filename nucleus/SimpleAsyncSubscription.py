@@ -7,7 +7,6 @@ import thread
 import weakref
 from optparse import OptionParser
 from blpapi import Event as EventType
-import sys
 
 SESSION_STARTED = blpapi.Name("SessionStarted")
 SESSION_STARTUP_FAILURE = blpapi.Name("SessionStartupFailure")
@@ -67,6 +66,43 @@ def topicName(security):
         return "//blp/mktdata/" + security
 
 
+
+
+
+from django.shortcuts import get_object_or_404, render, redirect
+#from django_socketio import broadcast_channel, broadcast, NoSocket
+from omnibus.api import publish
+from time import strftime, gmtime
+import datetime
+
+def printMessage(msg, eventType):
+    text = "#{0} msg received: [{1}] => {2}/{3}\n{4}\n{5}\n{6}\n{7}".format(
+        msg.getElement("EVENT_TIME") if msg.hasElement("EVENT_TIME") else "",
+        ", ".join(map(str, msg.correlationIds())),
+        EVENT_TYPE_NAMES[eventType],
+        msg.messageType(),
+        msg.numElements(),
+        msg.getElement("MKTDATA_EVENT_TYPE") if msg.hasElement("MKTDATA_EVENT_TYPE") else "",
+        msg.getElement("MKTDATA_EVENT_SUBTYPE") if msg.hasElement("MKTDATA_EVENT_SUBTYPE") else "",
+        msg)
+    #print strftime("%H:%M:%S",gmtime()), msg.getElement("EVENT_TIME") if msg.hasElement("EVENT_TIME") else ""
+
+    data = {"action": "message", "message": str(msg)}
+
+    try:
+        publish(
+            'main',  # the name of the channel
+            'message',  # the `type` of the message/event, clients use this name
+            # to register event handlers
+            {'data': data},  # payload of the event, needs to be
+            # a dict which is JSON dumpable.
+            sender='server'  # sender id of the event, can be None.
+        )
+        #broadcast_channel(data, channel="main")
+    except:
+        print "SOCKET ERROR: ", sys.exc_info()[0]
+
+
 def parseCmdLine():
     parser = OptionParser()
     parser.add_option("-a",
@@ -99,10 +135,10 @@ def parseCmdLine():
                       "--auth-type",
                       type="choice",
                       choices=["LOGON", "NONE", "APPLICATION", "DIRSVC",
-                               "USER_APP"],
+                      "USER_APP"],
                       dest="authType",
                       help="Authentification type: LOGON (default), NONE, "
-                           "APPLICATION, DIRSVC or USER_APP",
+                      "APPLICATION, DIRSVC or USER_APP",
                       default="NONE")
     parser.add_option("",
                       "--auth-name",
@@ -121,45 +157,6 @@ def parseCmdLine():
     options.auth = getAuthentificationOptions(options.authType,
                                               options.authName)
     return options
-
-
-
-#from django_socketio import broadcast_channel, broadcast, NoSocket
-import os
-os.environ['DJANGO_SETTINGS_MODULE'] = 'unify.settings'
-from ws4redis.redis_store import RedisMessage
-from ws4redis.publisher import RedisPublisher
-import datetime, json
-
-def publish(channel, data):
-    msg = RedisMessage(data)  # create a welcome message to be sent to everybody
-    RedisPublisher(facility=channel, broadcast=True).publish_message(msg)
-
-
-def printMessage(msg, eventType):
-    text = "#{0} msg received: [{1}] => {2}/{3}\n{4}\n{5}\n{6}\n{7}".format(
-        msg.getElement("EVENT_TIME") if msg.hasElement("EVENT_TIME") else "",
-        ", ".join(map(str, msg.correlationIds())),
-        EVENT_TYPE_NAMES[eventType],
-        msg.messageType(),
-        msg.numElements(),
-        msg.getElement("MKTDATA_EVENT_TYPE") if msg.hasElement("MKTDATA_EVENT_TYPE") else "",
-        msg.getElement("MKTDATA_EVENT_SUBTYPE") if msg.hasElement("MKTDATA_EVENT_SUBTYPE") else "",
-        msg)
-    #print strftime("%H:%M:%S",gmtime()), msg.getElement("EVENT_TIME") if msg.hasElement("EVENT_TIME") else ""
-
-    data = {"action": "message", "message": str(msg)}
-
-    try:
-        publish(
-            'blp',  # the name of the channel
-            json.dumps(data),  # payload of the event, needs to be
-        )
-        #broadcast_channel(data, channel="main")
-    except:
-        print "SOCKET ERROR: ", sys.exc_info()[0]
-
-
 
 
 # Subscribe 'session' for the securities and fields specified in 'options'
@@ -239,9 +236,8 @@ def processEvent(event, session):
         # Interrupt a "sleep loop" in main thread
         thread.interrupt_main()
 
-#GLOBAL_SESSIONS = {}
+
 def go():
-    print "Bloomberg Thread Started"
     global options
     options = parseCmdLine()
 
@@ -258,39 +254,35 @@ def go():
     # Create a Session
     session = blpapi.Session(sessionOptions, processEvent, dispatcher)
 
+    # Start dispatcher to "pump" the received events
+    dispatcher.start()
+
+    # Start session asyncroniously
+    if not session.startAsync():
+        raise Exception("Can't initiate session start.")
+
     # Sleep until application will be interrupted by user (Ctrl+C pressed)
     # or because of the exception in event handler
     try:
-        # Start dispatcher to "pump" the received events
-        dispatcher.start()
-
-        # Start session asyncroniously
-        if not session.startAsync():
-            raise Exception("Can't initiate session start.")
-
         # Note that: 'thread.interrupt_main()' could be used to
         # correctly stop the application from 'processEvent'
         while True:
             time.sleep(1)
     finally:
-        print "Stopping BLP"
         session.stop()
         dispatcher.stop()
         print "Stopped BLP"
-        f = open('blp_log.txt','w')
-        f.write(str(datetime.datetime.now()) + '\t: Stopped BLP\n')
-        f.close()
 
 
 
-
+'''
 if __name__ == "__main__":
     print "SimpleAsyncSubscription"
     try:
         go()
     except KeyboardInterrupt:
         print "Ctrl+C pressed. Stopping..."
-
+'''
 __copyright__ = """
 
 Copyright 2012. Bloomberg Finance L.P.
