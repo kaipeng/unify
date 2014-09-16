@@ -1,0 +1,101 @@
+{% extends "dashboard.html" %}
+
+{% block handlebars_panel %}
+{% verbatim %}
+  <script type="text/x-handlebars">
+    <div class="navbar">
+      <div class="navbar-inner">
+        {{#link-to 'index' class='brand'}}Tactical Corporate Trading{{/link-to}}
+        <ul class="nav">
+          <li>{{#link-to 'sortable'}}Sortable{{/link-to}}</li>
+          <li>{{#link-to 'financial'}}Financial{{/link-to}}</li>
+          <li>{{#link-to 'hello'}}Hello{{/link-to}}</li>
+
+          <li><span id="clock">&nbsp;</span></li>
+        </ul>
+      </div>
+    </div>
+
+    {{outlet}}
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="sortable-header-cell">
+    <div class="ember-table-content-container" {{action sortByColumn view.content}}>
+      <span class="ember-table-content">
+        {{view.content.headerCellName}}
+        {{#if view.content.supportSort}}
+        <div style="float:right;">
+        {{#if view.content.sorted}}
+          {{#if sortAscending}}
+          <div style="cursor:s-resize;" title="Ascending">
+            &#8593;
+          </div>
+          {{else}}
+          <div style="cursor:n-resize;" title="Descending">
+            &#8595;
+          </div>
+          {{/if}}
+        {{else}}
+          &#8645;
+        {{/if}}
+          </div>
+        {{/if}}
+      </span>
+    </div>
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="index">
+    <div>
+        Welcome to the Index
+    </div>
+  </script>
+
+  <script type="text/x-handlebars" data-template-name="sortable">
+    <div class="table-container">
+      {{sortable-table-component
+        hasFooter=false
+        columnsBinding="columns"
+        contentBinding="content"
+        enableContentSelection=true
+        sortAction="sort"
+        sortAscendingBinding="sortAscending"
+      }}
+      <ul class="pagination">
+        <li class="disabled"><a {{action previousPage}}>&laquo;</a></li>
+        <li class="active">
+          <span>{{page}} <span class="sr-only">(current)</span></span>
+        </li>
+        <li class="disabled"><a {{action nextPage}}>&raquo;</a></li>
+      </ul>
+    </div>
+  </script>
+
+    <script type="text/x-handlebars" data-template-name="financial">
+      <div class="table-container">
+        {{table-component
+            hasHeader=true
+            hasFooter=false
+            numFixedColumns=0
+            rowHeight=35
+            columnsBinding="columns"
+            contentBinding="content"
+        }}
+      </div>
+    </script>
+
+  <script type="text/x-handlebars" data-template-name="hello">
+      <div class="table-container">
+        {{table-component
+          hasFooter=false
+          enableContentSelection=true
+          columnsBinding="columns"
+          contentBinding="content"
+        }}
+      </div>
+    </script>
+  <script type="text/x-handlebars" data-template-name="bar_table_cell">
+      <span class="bar-cell {{view.barColor}}"  {{bind-attr style="view.histogramStyle"}}></span>
+  </script>
+{% endverbatim %}
+{% endblock handlebars_panel %}
+
